@@ -7,7 +7,7 @@ var filter = function (pathname, req) {
   // replace www.myapp.example with origin(s) that your content will be served from
   // return (req.headers.origin === 'https://www.myapp.example');
   // multiple origin version:
-  return ((req.headers.origin === 'http://127.0.0.1:5500') || (req.headers.origin === 'https://127.0.0.1:5500') || (req.headers.origin === 'https://sduzair.github.io'));   
+  return ((req.headers.origin === 'https://sduzair.github.io'));   
 };
 
 var apiOptions = {
