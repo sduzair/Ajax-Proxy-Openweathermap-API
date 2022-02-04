@@ -54,7 +54,7 @@ Configuration instructions include steps for deploying to Heroku, but proxy can 
    6. In the front-end code for your app, rewrite the URL in your ajax request to use your Heroku proxy app as the base URL.
 
 ## Example
-The following code uses the U.S. [National Park Service API]().
+The following code uses the Open Weather API - Retreives weather info on Canadian cities https://openweathermap.org/api.
 
 ```js
 var express = require('express');
