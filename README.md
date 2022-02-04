@@ -2,7 +2,7 @@
 
 A proxy server for redirecting HTTP requests from client-side code using credentials stored on the back end.
 
-Based on [Expressjs](https://expressjs.com) and [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware).
+Based on [Expressjs](https://expressjs.com).
 
 Configuration instructions include steps for deploying to Heroku, but proxy can be deployed to any Node environment.
 
@@ -60,29 +60,38 @@ The following code uses the U.S. [National Park Service API]().
 var express = require('express');
 var proxy = require('http-proxy-middleware');
 
+// proxy middleware options
 var filter = function (pathname, req) {
-  return ((req.headers.origin === 'http://127.0.0.1:5500') ||
-          (req.headers.origin === 'https://127.0.0.1:5500'));
+  // return true;
+  // replace www.myapp.example with origin(s) that your content will be served from
+  // return (req.headers.origin === 'https://www.myapp.example');
+  // multiple origin version:
+  return ((req.headers.origin === 'https://sduzair.github.io'));   
 };
 
-var npsOptions = {
-  target: 'https://developer.nps.gov', 
-  changeOrigin: true, 
+var apiOptions = {
+  // replace api.datasource.example with the url of your target host
+  target: 'https://api.openweathermap.org',
+  changeOrigin: true, // needed for virtual hosted sites like Heroku
   pathRewrite: {
-    '^/nps/': '/', 
+    '^/weatherapi/': '/', // remove endpoint from request path ('^/api/': '/')
   },
-  onProxyReq: (proxyReq, req, res) => {
-    proxyReq.path += ('&api_key=' + process.env.NPS_APIKEY);
+  onProxyReq: (proxyReq) => {
+    // append key-value pair for API key to end of path
+    // using KEYNAME provided by web service
+    // and KEYVALUE stored in Heroku environment variable
+    proxyReq.path += ('&appid=' + process.env.OWM_APIKEY + '&units=metric');
   },
-  logLevel: 'debug'
+  logLevel: 'debug' // verbose server logging
 };
 
-var npsProxy = proxy(filter, npsOptions);
+// create the proxy (without context)
+var apiProxy = proxy(filter, apiOptions);
 
 var app = express();
 app.set('port', (process.env.PORT || 5000));
 
-app.use('/nps', npsProxy);
+app.use('/weatherapi', apiProxy);
 
 app.listen(app.get('port'));
 
@@ -91,19 +100,5 @@ app.listen(app.get('port'));
 Starting with a front-end request like
 
 ```http
-https://<HEROKU-INSTANCE>.herokuapp.com/nps/api/v1/parks?stateCode=ca
+https://<HEROKU-INSTANCE>.herokuapp.com/weatherapi/data/2.5/weather?q=[cityField],CA
 ```
-
-the proxy rewrites and forwards the request as
-
-```http
-https://developer.nps.gov/api/v1/parks?stateCode=ca&api_key=########
-```
-
-(where `########` is the secret key stored in the Heroku Config Var with the name `NPS_APIKEY`)
-
-## License
-
-[The MIT License (MIT)](https://choosealicense.com/licenses/mit/)
-
-Copyright (c) 2019 Sasha Vodnik
